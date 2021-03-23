@@ -4,3 +4,9 @@ export interface Point {
     z: number,
     value: number
 }
+
+export enum GameStatuses {
+    RoundSelect = "round-select",
+    Playing = "playing",
+    GameOver = "game-over"
+}

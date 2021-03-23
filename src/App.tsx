@@ -4,12 +4,7 @@ import {beHost, createServer, getServer} from './Server';
 import {ServerHost} from "./components/ServerHost";
 import {Point} from "./types";
 import {Grid} from "./components/Grid";
-
-enum GameStatus {
-  RoundSelect = "round-select",
-  Playing = "playing",
-  GameOver = "game-over"
-}
+import {GameStatus} from "./components/GameStatus";
 
 const sizeContainer = [2,3,4];
 
@@ -22,7 +17,6 @@ function App() {
     const buttons = sizeContainer.map((x) => {
         return <button value='Value'>{x}</button>
     });
-
 
     useEffect(() => {
         fetchData('/2');
@@ -48,7 +42,7 @@ function App() {
                 <div>Select radius: {buttons}</div>
             </div>
             <Grid currentGrid={grid}></Grid>
-            <div>Gaming status: {GameStatus.RoundSelect}</div>
+            <GameStatus/>
             <div>{gameHelp}</div>
         </div>
     );
