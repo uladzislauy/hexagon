@@ -6,6 +6,7 @@ import {DefaultGameSize, GameStatuses, Point} from "./types";
 import {Grid} from "./components/Grid";
 import {GameStatus} from "./components/GameStatus";
 import {GameSizeSelector} from "./components/GameSizeSelector";
+import {keydownHandler} from "./helpers/KeyboardHandler";
 
 const gameHelp = "Use q, w, e, a, s, d keys for move";
 
@@ -14,6 +15,8 @@ function App() {
     const [grid, changeGrid] = useState<Point[]>([]);
     const [gameStatus, changeGameStatus] = useState<keyof typeof GameStatuses>("RoundSelect");
     const [gameSize, setGameSize] = useState(DefaultGameSize);
+
+    window.addEventListener("keydown", keydownHandler);
 
     useEffect(() => {
         createServer(hostAddress);
