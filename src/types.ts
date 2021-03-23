@@ -10,3 +10,7 @@ export enum GameStatuses {
     Playing = "playing",
     GameOver = "game-over"
 }
+
+export const GameSizes = [2,3,4];
+
+export const DefaultGameSize = 0;

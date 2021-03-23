@@ -2,31 +2,27 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import {beHost, createServer, getServer} from './Server';
 import {ServerHost} from "./components/ServerHost";
-import {Point} from "./types";
+import {DefaultGameSize, Point} from "./types";
 import {Grid} from "./components/Grid";
 import {GameStatus} from "./components/GameStatus";
-
-const sizeContainer = [2,3,4];
+import {GameSizeSelector} from "./components/GameSizeSelector";
 
 const gameHelp = "Use q, w, e, a, s, d keys for move";
 
 function App() {
     const [hostAddress, setAddress] = useState(beHost);
     const [grid, changeGrid] = useState<Point[]>([]);
-
-    const buttons = sizeContainer.map((x) => {
-        return <button value='Value'>{x}</button>
-    });
+    const [gameSize, setGameSize] = useState(DefaultGameSize);
 
     useEffect(() => {
-        fetchData('/2');
+        fetchData(`/${gameSize}`);
 
         async function fetchData(url: string){
             let gameApiConnector = getServer();
             let response = await gameApiConnector.post<Point[]>(url, []);
             changeGrid(response.data);
         }
-    }, [hostAddress]);
+    }, [hostAddress, gameSize]);
 
     const createNewServer = () => {
         createServer(hostAddress);
@@ -39,7 +35,7 @@ function App() {
             <div>
                 <div>RNG-server url</div>
                 <ServerHost serverHost={hostAddress} setServerHost={setAddress}/>
-                <div>Select radius: {buttons}</div>
+                <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
             <Grid currentGrid={grid}></Grid>
             <GameStatus/>
