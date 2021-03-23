@@ -16,6 +16,10 @@ function App() {
     const [gameSize, setGameSize] = useState(DefaultGameSize);
 
     useEffect(() => {
+        createServer(hostAddress);
+    }, [hostAddress]);
+
+    useEffect(() => {
         fetchData(`/${gameSize}`);
 
         async function fetchData(url: string){
@@ -23,13 +27,7 @@ function App() {
             let response = await gameApiConnector.post<Point[]>(url, []);
             changeGrid(response.data);
         }
-    }, [hostAddress, gameSize]);
-
-    const createNewServer = () => {
-        createServer(hostAddress);
-    };
-
-    createNewServer();
+    }, [gameSize]);
 
     return (
         <div className="App">
