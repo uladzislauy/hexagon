@@ -2,18 +2,13 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import {beHost, createServer, getServer} from './Server';
 import {ServerHost} from "./components/ServerHost";
+import {Point} from "./types";
+import {Grid} from "./components/Grid";
 
 enum GameStatus {
   RoundSelect = "round-select",
   Playing = "playing",
   GameOver = "game-over"
-}
-
-interface Point {
-    x: number,
-    y: number,
-    z: number,
-    value: number
 }
 
 const sizeContainer = [2,3,4];
@@ -28,12 +23,6 @@ function App() {
         return <button value='Value'>{x}</button>
     });
 
-    const gridElements = grid.map(point =>{
-        let coords = `${point.x.toString()};${point.y.toString()};${point.z.toString()}`;
-        console.log(coords);
-        console.log(point);
-        return <li key={coords}>{point.value}</li>;
-    });
 
     useEffect(() => {
         fetchData('/2');
@@ -58,7 +47,7 @@ function App() {
                 <ServerHost serverHost={hostAddress} setServerHost={setAddress}/>
                 <div>Select radius: {buttons}</div>
             </div>
-            {gridElements}
+            <Grid currentGrid={grid}></Grid>
             <div>Gaming status: {GameStatus.RoundSelect}</div>
             <div>{gameHelp}</div>
         </div>
