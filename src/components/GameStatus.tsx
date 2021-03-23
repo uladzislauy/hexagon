@@ -1,8 +1,8 @@
 import React from "react";
 import {GameStatuses} from "../types";
 
-export const GameStatus: React.FC = () => {
-    return (
-        <div>Gaming status: {GameStatuses.RoundSelect}</div>
-    );
+interface GameStatusProps {
+    currentStatus: keyof typeof GameStatuses,
 };
+
+export const GameStatus: React.FC<GameStatusProps> = ({ currentStatus }) => (<div>Gaming status: {currentStatus}</div>);

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import {beHost, createServer, getServer} from './Server';
 import {ServerHost} from "./components/ServerHost";
-import {DefaultGameSize, Point} from "./types";
+import {DefaultGameSize, GameStatuses, Point} from "./types";
 import {Grid} from "./components/Grid";
 import {GameStatus} from "./components/GameStatus";
 import {GameSizeSelector} from "./components/GameSizeSelector";
@@ -12,6 +12,7 @@ const gameHelp = "Use q, w, e, a, s, d keys for move";
 function App() {
     const [hostAddress, setAddress] = useState(beHost);
     const [grid, changeGrid] = useState<Point[]>([]);
+    const [gameStatus, changeGameStatus] = useState<keyof typeof GameStatuses>("RoundSelect");
     const [gameSize, setGameSize] = useState(DefaultGameSize);
 
     useEffect(() => {
@@ -38,7 +39,7 @@ function App() {
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
             <Grid currentGrid={grid}></Grid>
-            <GameStatus/>
+            <GameStatus currentStatus={gameStatus}/>
             <div>{gameHelp}</div>
         </div>
     );
