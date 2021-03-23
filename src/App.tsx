@@ -7,8 +7,7 @@ import {Grid} from "./components/Grid";
 import {GameStatus} from "./components/GameStatus";
 import {GameSizeSelector} from "./components/GameSizeSelector";
 import {keydownHandler} from "./helpers/KeyboardHandler";
-
-const gameHelp = "Use q, w, e, a, s, d keys for move";
+import {GameHelp} from "./components/GameHelp";
 
 function App() {
     const [hostAddress, setAddress] = useState(beHost);
@@ -25,7 +24,7 @@ function App() {
     useEffect(() => {
         fetchData(`/${gameSize}`);
 
-        async function fetchData(url: string){
+        async function fetchData(url: string) {
             let gameApiConnector = getServer();
             let response = await gameApiConnector.post<Point[]>(url, []);
             changeGrid(response.data);
@@ -41,7 +40,7 @@ function App() {
             </div>
             <Grid currentGrid={grid}></Grid>
             <GameStatus currentStatus={gameStatus}/>
-            <div>{gameHelp}</div>
+            <GameHelp/>
         </div>
     );
 }
