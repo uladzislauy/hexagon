@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
-import {beHost, createServer, getServer} from './Server';
+import {beHost, createGameApiConnector, getGameApiConnector} from './GameApiConnector';
 import {ServerHost} from "./components/ServerHost";
 import {Point} from "./types";
 import {Grid} from "./components/Grid";
@@ -19,14 +19,14 @@ function App() {
     window.addEventListener("keydown", keydownHandler);
 
     useEffect(() => {
-        createServer(hostAddress);
+        createGameApiConnector(hostAddress);
     }, [hostAddress]);
 
     useEffect(() => {
         fetchData(`/${gameSize}`);
 
         async function fetchData(url: string) {
-            const gameApiConnector = getServer();
+            const gameApiConnector = getGameApiConnector();
             try {
                 const response = await gameApiConnector.post<Point[]>(url, []);
                 changeGrid(response.data);
