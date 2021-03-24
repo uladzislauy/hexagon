@@ -1,0 +1,6 @@
+.cell {
+    fill: rgb(209, 199, 190);
+    stroke-linejoin: round;
+    stroke-width: 10px;
+    stroke: #bbada0;
+}

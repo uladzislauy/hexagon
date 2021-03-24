@@ -2,19 +2,27 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import {beHost, createGameApiConnector, getGameApiConnector} from './GameApiConnector';
 import {ServerHost} from "./components/ServerHost";
-import {Point} from "./types";
-import {Grid} from "./components/Grid";
+import {BaseGrid, CellSize, Point} from "./types";
+import {Grid} from "./components/Grid/Grid";
 import {GameStatus} from "./components/GameStatus";
 import {GameSizeSelector} from "./components/GameSizeSelector";
 import {keydownHandler} from "./helpers/KeyboardHandler";
 import {GameHelp} from "./components/GameHelp";
-import {DefaultGameSize, GameStatuses} from "./consts";
+import {DefaultGameSize, GameStatuses, LayoutWidth} from "./consts";
+import {
+    buildBaseGrid,
+    calculateCellCornerPoints,
+    calculateCellSizeByRadius,
+    calculateCellRadius
+} from "./utils/GridCalculations";
 
-function App() {
+function App(): JSX.Element {
     const [hostAddress, setAddress] = useState(beHost);
     const [grid, changeGrid] = useState<Point[]>([]);
     const [gameStatus, changeGameStatus] = useState<keyof typeof GameStatuses>("RoundSelect");
     const [gameSize, setGameSize] = useState(DefaultGameSize);
+    const [gameGrid, setGameGrid] = useState<BaseGrid>([]);
+    const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
 
     window.addEventListener("keydown", keydownHandler);
 
@@ -30,11 +38,21 @@ function App() {
             try {
                 const response = await gameApiConnector.post<Point[]>(url, []);
                 changeGrid(response.data);
-            }
-            catch (e){
+            } catch (e) {
                 console.log(e);
             }
         }
+    }, [gameSize]);
+
+    useEffect(() => {
+        const cellRadius = calculateCellRadius(LayoutWidth, gameSize);
+        const cellSize = calculateCellSizeByRadius(cellRadius);
+        const cellCorners = calculateCellCornerPoints(cellSize, cellRadius);
+
+        const baseGrid = buildBaseGrid(gameSize, cellRadius, cellCorners);
+
+        setCellSize(cellSize);
+        setGameGrid(baseGrid);
     }, [gameSize]);
 
     return (
@@ -44,7 +62,7 @@ function App() {
                 <ServerHost serverHost={hostAddress} setServerHost={setAddress}/>
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
-            <Grid currentGrid={grid}></Grid>
+            <Grid cellSize={cellSize} baseGrid={gameGrid}/>
             <GameStatus currentStatus={gameStatus}/>
             <GameHelp/>
         </div>
