@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useCallback} from "react";
 import {GameSizes} from "../consts";
 import classNames from 'classnames';
 
@@ -10,7 +10,13 @@ interface GameSizeSelectorProps {
 export const GameSizeSelector: React.FC<GameSizeSelectorProps> = ({selectedSize, setSelectedSize}) => {
     const buttons = GameSizes.map((buttonSize) => {
         const btnClass = classNames({'selected': selectedSize === buttonSize});
-        return <button  className={btnClass} value={buttonSize} onClick={_ => setSelectedSize(selectedSize)}>{buttonSize}</button>
+
+        const onClick = useCallback(((event: React.MouseEvent<HTMLButtonElement>) => {
+            const selectedSize = parseInt(event.currentTarget.value);
+            setSelectedSize(selectedSize);
+        }), [setSelectedSize]);
+
+        return <button  className={btnClass} value={buttonSize} onClick={onClick}>{buttonSize}</button>
     });
 
     return (
