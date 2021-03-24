@@ -1,5 +1,5 @@
 import React from "react";
-import {GameSizes} from "../types";
+import {GameSizes} from "../consts";
 var classNames = require('classnames');
 
 interface GameSizeSelectorProps {

@@ -1,9 +1,8 @@
 import React from "react";
-
-const gameHelp = "Use q, w, e, a, s, d keys for move";
+import {GameHelpText} from "../consts";
 
 export const GameHelp: React.FC = () => {
     return (
-        <div>{gameHelp}</div>
+        <div>{GameHelpText}</div>
     );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import {GameStatuses} from "../types";
+import {GameStatuses} from "../consts";
 
 interface GameStatusProps {
     currentStatus: keyof typeof GameStatuses,

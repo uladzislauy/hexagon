@@ -2,12 +2,13 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import {beHost, createServer, getServer} from './Server';
 import {ServerHost} from "./components/ServerHost";
-import {DefaultGameSize, GameStatuses, Point} from "./types";
+import {Point} from "./types";
 import {Grid} from "./components/Grid";
 import {GameStatus} from "./components/GameStatus";
 import {GameSizeSelector} from "./components/GameSizeSelector";
 import {keydownHandler} from "./helpers/KeyboardHandler";
 import {GameHelp} from "./components/GameHelp";
+import {DefaultGameSize, GameStatuses} from "./consts";
 
 function App() {
     const [hostAddress, setAddress] = useState(beHost);
