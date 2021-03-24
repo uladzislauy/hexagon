@@ -11,4 +11,4 @@ export function keydownHandler(evt: KeyboardEvent): void{
         default:
             break;
     }
-};
+}

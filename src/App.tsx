@@ -26,9 +26,9 @@ function App() {
         fetchData(`/${gameSize}`);
 
         async function fetchData(url: string) {
-            let gameApiConnector = getServer();
+            const gameApiConnector = getServer();
             try {
-                let response = await gameApiConnector.post<Point[]>(url, []);
+                const response = await gameApiConnector.post<Point[]>(url, []);
                 changeGrid(response.data);
             }
             catch (e){
