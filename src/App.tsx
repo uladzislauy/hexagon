@@ -27,15 +27,20 @@ function App() {
 
         async function fetchData(url: string) {
             let gameApiConnector = getServer();
-            let response = await gameApiConnector.post<Point[]>(url, []);
-            changeGrid(response.data);
+            try {
+                let response = await gameApiConnector.post<Point[]>(url, []);
+                changeGrid(response.data);
+            }
+            catch (e){
+                console.log(e);
+            }
         }
     }, [gameSize]);
 
     return (
         <div className="App">
             <div>
-                <div>RNG-server url</div>
+                <div>Game server url</div>
                 <ServerHost serverHost={hostAddress} setServerHost={setAddress}/>
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
