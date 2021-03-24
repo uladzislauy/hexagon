@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
-import {beHost, createGameApiConnector, getGameApiConnector} from './GameApiConnector';
+import {beHost, createGameApiConnector, getGameApiConnector} from './utils/GameApiConnector';
 import {ServerHost} from "./components/ServerHost";
 import {BaseGrid, CellSize, Point} from "./types";
 import {Grid} from "./components/Grid/Grid";
@@ -12,8 +12,8 @@ import {DefaultGameSize, GameStatuses, LayoutWidth} from "./consts";
 import {
     buildBaseGrid,
     calculateCellCornerPoints,
-    calculateCellSizeByRadius,
-    calculateCellRadius
+    calculateCellRadius,
+    calculateCellSizeByRadius
 } from "./utils/GridCalculations";
 
 function App(): JSX.Element {
