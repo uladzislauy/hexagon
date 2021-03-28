@@ -19,7 +19,7 @@ import {
 function App(): JSX.Element {
     const [hostAddress, setAddress] = useState(beHost);
     const [grid, changeGrid] = useState<Point[]>([]);
-    const [gameStatus, changeGameStatus] = useState<keyof typeof GameStatuses>("RoundSelect");
+    const [gameStatus, changeGameStatus] = useState<GameStatuses>(GameStatuses.RoundSelect);
     const [gameSize, setGameSize] = useState(DefaultGameSize);
     const [gameGrid, setGameGrid] = useState<BaseGrid>([]);
     const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
@@ -52,6 +52,7 @@ function App(): JSX.Element {
         const baseGrid = buildBaseGrid(gameSize, cellRadius, cellCorners);
 
         setCellSize(cellSize);
+        changeGameStatus(GameStatuses.Playing);
         setGameGrid(baseGrid);
     }, [gameSize]);
 
