@@ -1,7 +1,7 @@
 export enum GameStatuses {
-    RoundSelect = "round-select",
-    Playing = "playing",
-    GameOver = "game-over"
+    RoundSelect = "Round select",
+    Playing = "Playing",
+    GameOver = "Game over"
 }
 
 export const GameSizes = [2,3,4];
