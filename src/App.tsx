@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import {beHost, createGameApiConnector, getGameApiConnector} from './utils/GameApiConnector';
 import {ServerHost} from "./components/ServerHost";
-import {BaseGrid, CellSize, Point} from "./types";
+import {BaseGrid, CellSize, FilledGrid, Point, PointWithValue} from "./types";
 import {Grid} from "./components/Grid/Grid";
 import {GameStatus} from "./components/GameStatus";
 import {GameSizeSelector} from "./components/GameSizeSelector";
@@ -15,20 +15,24 @@ import {
     calculateCellRadius,
     calculateCellSizeByRadius
 } from "./utils/GridCalculations";
+import {getUpdatedGameGrid} from "./utils/GameCalculations";
 
 function App(): JSX.Element {
     const [hostAddress, setAddress] = useState(beHost);
-    const [grid, changeGrid] = useState<Point[]>([]);
     const [gameStatus, changeGameStatus] = useState<GameStatuses>(GameStatuses.RoundSelect);
     const [gameSize, setGameSize] = useState(DefaultGameSize);
-    const [gameGrid, setGameGrid] = useState<BaseGrid>([]);
     const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
+
+    const [baseGameGrid, setBaseGameGrid] = useState<BaseGrid>([]);
+    const [gameGrid, setGameGrid] = useState<FilledGrid>(new Map());
+
+    const [serverPoints, setServerPoints] = useState<PointWithValue[]>([]);
+
+    const baseGrid: FilledGrid = new Map(baseGameGrid.map((cell, index) => [index, cell]));
 
     window.addEventListener("keydown", keydownHandler);
 
-    useEffect(() => {
-        createGameApiConnector(hostAddress);
-    }, [hostAddress]);
+    useEffect(() => createGameApiConnector(hostAddress), [hostAddress]);
 
     useEffect(() => {
         fetchData(`/${gameSize}`);
@@ -37,7 +41,7 @@ function App(): JSX.Element {
             const gameApiConnector = getGameApiConnector();
             try {
                 const response = await gameApiConnector.post<Point[]>(url, []);
-                changeGrid(response.data);
+                setServerPoints(response.data);
             } catch (e) {
                 console.log(e);
             }
@@ -50,11 +54,13 @@ function App(): JSX.Element {
         const cellCorners = calculateCellCornerPoints(cellSize, cellRadius);
 
         const baseGrid = buildBaseGrid(gameSize, cellRadius, cellCorners);
+        const updatedGameGrid = getUpdatedGameGrid(serverPoints, baseGrid, new Map());
 
+        setBaseGameGrid(baseGrid);
+        setGameGrid(updatedGameGrid);
         setCellSize(cellSize);
         changeGameStatus(GameStatuses.Playing);
-        setGameGrid(baseGrid);
-    }, [gameSize]);
+    }, [serverPoints, gameSize])
 
     return (
         <div className="App">
@@ -63,6 +69,7 @@ function App(): JSX.Element {
                 <ServerHost serverHost={hostAddress} setServerHost={setAddress}/>
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
+            <Grid cellSize={cellSize} baseGrid={baseGrid}/>
             <Grid cellSize={cellSize} baseGrid={gameGrid}/>
             <GameStatus currentStatus={gameStatus}/>
             <GameHelp/>

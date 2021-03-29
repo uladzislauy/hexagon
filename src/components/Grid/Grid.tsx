@@ -1,16 +1,17 @@
 import React from 'react';
-import {BaseGrid, CellSize} from "../../types";
+import {CellSize, FilledGrid, GameCell} from "../../types";
 import {GridCell} from "./GridCell";
+import "./Grid.css";
 
 interface GridProps {
     cellSize: CellSize;
-    baseGrid: BaseGrid;
+    baseGrid: FilledGrid;
 }
 
 export const Grid: React.FC<GridProps> = ({cellSize, baseGrid}) => {
-    const gridCells = baseGrid.map((gridCell, index) => {
-        return <GridCell key={index} cellSize={cellSize} gridCell={gridCell}/>
+    const gridCells = [...baseGrid.entries()].map(([key, value]: [number, GameCell]) => {
+        return <GridCell key={key} cellSize={cellSize} gameCell={value}/>
     });
 
-    return <div>{gridCells}</div>;
+    return <div className="cellGrid">{gridCells}</div>;
 };

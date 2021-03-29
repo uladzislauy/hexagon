@@ -1,0 +1,8 @@
+.cellGrid {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    max-width: 40em;
+}

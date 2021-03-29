@@ -1,24 +1,30 @@
 import React, {CSSProperties} from 'react';
-import {CellSize, GameCell} from "../../types";
+import {CellSize, CellType, GameCell} from "../../types";
 import './GridCell.css';
 
 interface GridCellProps {
     cellSize: CellSize;
-    gridCell: GameCell;
+    gameCell: GameCell;
 }
 
-export const GridCell: React.FC<GridCellProps> = ({cellSize, gridCell}) => {
-    const hexStyle: CSSProperties = {
+export const GridCell: React.FC<GridCellProps> = ({cellSize, gameCell}) => {
+    const cellStyle: CSSProperties = {
         position: "absolute",
-        left: gridCell.left,
-        top: gridCell.top
+        left: gameCell.left,
+        top: gameCell.top
     }
 
-    return (
-        <div style={hexStyle}>
-            <svg width={cellSize.width} height={cellSize.height}>
-                <path className="cell" d={gridCell.points}></path>
-            </svg>
-        </div>
-    );
+    const cellContent = (gameCell.type === CellType.base)
+        ? <path className="cell" d={gameCell.points}></path>
+        : <g className="textCell">
+            <text x="50%" y="50%" fontSize={`${cellSize.width / 4}px`} textAnchor="middle" dominantBaseline="middle">
+                {gameCell.value || ''}
+            </text>
+        </g>
+
+    return <div style={cellStyle}>
+        <svg width={cellSize.width} height={cellSize.height}>
+            {cellContent}
+        </svg>
+    </div>
 };
