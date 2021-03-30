@@ -1,6 +1,7 @@
 import React, {useCallback} from "react";
 import {GameSizes} from "../consts";
 import classNames from 'classnames';
+import "./GameSizeSelector.css";
 
 interface GameSizeSelectorProps {
     selectedSize: number,

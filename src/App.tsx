@@ -93,10 +93,10 @@ function App(): JSX.Element {
                 <ServerHost setServerHost={setAddress}/>
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
-            <Grid cellSize={cellSize} baseGrid={baseGrid}/>
-            <Grid cellSize={cellSize} baseGrid={gameGrid}/>
             <GameStatus currentStatus={gameStatus}/>
             <GameHelp keydownHandler={handleKeyDown}/>
+            <Grid cellSize={cellSize} baseGrid={baseGrid}/>
+            <Grid cellSize={cellSize} baseGrid={gameGrid}/>
         </div>
     );
 }

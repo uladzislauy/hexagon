@@ -13,5 +13,5 @@ export const Grid: React.FC<GridProps> = ({cellSize, baseGrid}) => {
         return <GridCell key={key} cellSize={cellSize} gameCell={value}/>
     });
 
-    return <div className="cellGrid">{gridCells}</div>;
+    return <div className="grid">{gridCells}</div>;
 };
