@@ -22,7 +22,7 @@ export const GridCell: React.FC<GridCellProps> = ({cellSize, gameCell}) => {
             </text>
         </g>
 
-    return <div style={cellStyle}>
+    return <div style={cellStyle} data-x={gameCell.x} data-y={gameCell.y} data-z={gameCell.z} data-value={gameCell.value}>
         <svg width={cellSize.width} height={cellSize.height}>
             {cellContent}
         </svg>
