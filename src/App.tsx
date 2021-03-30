@@ -1,13 +1,13 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
-import {beHost, createGameApiConnector, getGameApiConnector} from './utils/GameApiConnector';
+import {createGameApiConnector, getGameApiConnector} from './utils/GameApiConnector';
 import {ServerHost} from "./components/ServerHost";
 import {BaseGrid, CellSize, FilledGrid, Point} from "./types";
 import {Grid} from "./components/Grid/Grid";
 import {GameStatus} from "./components/GameStatus";
 import {GameSizeSelector} from "./components/GameSizeSelector";
 import {GameHelp} from "./components/GameHelp";
-import {DefaultGameSize, GameStatuses, LayoutWidth} from "./consts";
+import {BeHost, DefaultGameSize, GameStatuses, LayoutWidth} from "./consts";
 import {
     buildBaseGrid,
     calculateCellCornerPoints,
@@ -18,7 +18,7 @@ import {calculatePointsOnDirection, getUpdatedGameGrid} from "./utils/GameCalcul
 import {getDirectionByKey} from "./helpers/KeyboardHandler";
 
 function App(): JSX.Element {
-    const [hostAddress, setAddress] = useState(beHost);
+    const [hostAddress, setAddress] = useState(BeHost);
     const [gameStatus, changeGameStatus] = useState<GameStatuses>(GameStatuses.RoundSelect);
     const [gameSize, setGameSize] = useState(DefaultGameSize);
     const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
@@ -90,7 +90,7 @@ function App(): JSX.Element {
         <div className="App">
             <div>
                 <div>Game server url</div>
-                <ServerHost serverHost={hostAddress} setServerHost={setAddress}/>
+                <ServerHost setServerHost={setAddress}/>
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
             <Grid cellSize={cellSize} baseGrid={baseGrid}/>

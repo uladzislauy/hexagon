@@ -14,6 +14,8 @@ export const DefaultGameSize = 0;
 
 export const GameHelpText = "Use q, w, e, a, s, d keys for move";
 
+export const BeHost = "//68f02c80-3bed-4e10-a747-4ff774ae905a.pub.instances.scw.cloud";
+
 export enum Directions {
     UP = "KeyW",
     DOWN = "KeyS",
