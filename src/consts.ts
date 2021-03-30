@@ -1,9 +1,15 @@
 import {DirectionInfo} from "./types";
 
+export const NewGameStatuses = new Map([
+    ["RoundSelect", "round-select"],
+    ["Playing", "playing"],
+    ["GameOver", "game-over"],
+])
+
 export enum GameStatuses {
-    RoundSelect = "Round select",
-    Playing = "Playing",
-    GameOver = "Game over"
+    RoundSelect = "round-select",
+    Playing = "playing",
+    GameOver = "game-over"
 }
 
 export const GameSizes = [2, 3, 4];
