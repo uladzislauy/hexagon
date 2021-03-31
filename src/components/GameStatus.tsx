@@ -2,7 +2,9 @@ import React from "react";
 import {GameStatuses} from "../consts";
 
 interface GameStatusProps {
-    currentStatus: keyof typeof GameStatuses,
+    currentStatus: GameStatuses,
 }
 
-export const GameStatus: React.FC<GameStatusProps> = ({ currentStatus }) => (<div>Gaming status: {currentStatus}</div>);
+export const GameStatus: React.FC<GameStatusProps> = ({ currentStatus }) => {
+    return <div>Gaming status: <span data-status={currentStatus}>{currentStatus}</span></div>
+};

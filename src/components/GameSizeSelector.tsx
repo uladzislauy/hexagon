@@ -1,6 +1,7 @@
 import React, {useCallback} from "react";
 import {GameSizes} from "../consts";
 import classNames from 'classnames';
+import "./GameSizeSelector.css";
 
 interface GameSizeSelectorProps {
     selectedSize: number,
@@ -16,7 +17,7 @@ export const GameSizeSelector: React.FC<GameSizeSelectorProps> = ({selectedSize,
             setSelectedSize(selectedSize);
         }), [setSelectedSize]);
 
-        return <button  className={btnClass} value={buttonSize} onClick={onClick}>{buttonSize}</button>
+        return <button  className={btnClass} key={buttonSize} value={buttonSize} onClick={onClick}>{buttonSize}</button>
     });
 
     return (

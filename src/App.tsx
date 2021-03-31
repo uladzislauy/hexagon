@@ -1,43 +1,48 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
-import {beHost, createGameApiConnector, getGameApiConnector} from './utils/GameApiConnector';
+import {createGameApiConnector, getGameApiConnector} from './utils/GameApiConnector';
 import {ServerHost} from "./components/ServerHost";
-import {BaseGrid, CellSize, Point} from "./types";
+import {BaseGrid, CellSize, FilledGrid, Point} from "./types";
 import {Grid} from "./components/Grid/Grid";
 import {GameStatus} from "./components/GameStatus";
 import {GameSizeSelector} from "./components/GameSizeSelector";
-import {keydownHandler} from "./helpers/KeyboardHandler";
 import {GameHelp} from "./components/GameHelp";
-import {DefaultGameSize, GameStatuses, LayoutWidth} from "./consts";
+import {BeHost, DefaultGameSize, GameStatuses, LayoutWidth} from "./consts";
 import {
     buildBaseGrid,
     calculateCellCornerPoints,
     calculateCellRadius,
     calculateCellSizeByRadius
 } from "./utils/GridCalculations";
+import {calculatePointsOnDirection, getUpdatedGameGrid} from "./utils/GameCalculations";
+import {getDirectionByKey} from "./helpers/KeyboardHandler";
 
 function App(): JSX.Element {
-    const [hostAddress, setAddress] = useState(beHost);
-    const [grid, changeGrid] = useState<Point[]>([]);
-    const [gameStatus, changeGameStatus] = useState<keyof typeof GameStatuses>("RoundSelect");
+    const [hostAddress, setAddress] = useState(BeHost);
+    const [gameStatus, changeGameStatus] = useState<GameStatuses>(GameStatuses.RoundSelect);
     const [gameSize, setGameSize] = useState(DefaultGameSize);
-    const [gameGrid, setGameGrid] = useState<BaseGrid>([]);
     const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
 
-    window.addEventListener("keydown", keydownHandler);
+    const [baseGameGrid, setBaseGameGrid] = useState<BaseGrid>([]);
+    const [gameGrid, setGameGrid] = useState<FilledGrid>(new Map());
+
+    const [serverPoints, setServerPoints] = useState<Point[]>([]);
+    const [lastServerResponseWasEmpty, setLastServerResponseWasEmpty] = useState<boolean>(false);
+
+    const baseGrid: FilledGrid = new Map(baseGameGrid.map((cell, index) => [index, cell]));
+
+    useEffect(() => createGameApiConnector(hostAddress), [hostAddress]);
 
     useEffect(() => {
-        createGameApiConnector(hostAddress);
-    }, [hostAddress]);
+        if (gameSize === 0) return;
 
-    useEffect(() => {
         fetchData(`/${gameSize}`);
 
         async function fetchData(url: string) {
             const gameApiConnector = getGameApiConnector();
             try {
                 const response = await gameApiConnector.post<Point[]>(url, []);
-                changeGrid(response.data);
+                setServerPoints(response.data);
             } catch (e) {
                 console.log(e);
             }
@@ -45,26 +50,61 @@ function App(): JSX.Element {
     }, [gameSize]);
 
     useEffect(() => {
+        if (gameSize === 0 || serverPoints.length === 0) return;
+
         const cellRadius = calculateCellRadius(LayoutWidth, gameSize);
         const cellSize = calculateCellSizeByRadius(cellRadius);
         const cellCorners = calculateCellCornerPoints(cellSize, cellRadius);
+        setCellSize(cellSize);
 
         const baseGrid = buildBaseGrid(gameSize, cellRadius, cellCorners);
+        const updatedGameGrid = getUpdatedGameGrid(serverPoints, baseGrid, new Map());
+        setBaseGameGrid(baseGrid);
+        setGameGrid(updatedGameGrid);
+    }, [serverPoints, gameSize])
 
-        setCellSize(cellSize);
-        setGameGrid(baseGrid);
-    }, [gameSize]);
+    useEffect(() => {
+        if (serverPoints.length === 0) changeGameStatus(GameStatuses.RoundSelect);
+        //todo add check that player has no possible moves
+        else if (lastServerResponseWasEmpty) changeGameStatus(GameStatuses.GameOver);
+        else changeGameStatus(GameStatuses.Playing);
+    }, [lastServerResponseWasEmpty, serverPoints])
+
+    const handleKeyDown = useCallback((evt: KeyboardEvent) => {
+        if (serverPoints.length === 0) return;
+
+        const direction = getDirectionByKey(evt.code);
+        if (!direction) return;
+
+        const newPoints = calculatePointsOnDirection(direction, serverPoints, gameSize);
+
+        exchangeDataWithGameApi(`/${gameSize}`);
+
+        async function exchangeDataWithGameApi(url: string) {
+            const gameApiConnector = getGameApiConnector();
+            try {
+                const response = await gameApiConnector.post<Point[]>(url, newPoints);
+                response.data.map(newServerPoint => newPoints.push(newServerPoint));
+
+                setLastServerResponseWasEmpty(response.data.length === 0);
+                setServerPoints(newPoints);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    }, [serverPoints]);
 
     return (
         <div className="App">
             <div>
                 <div>Game server url</div>
-                <ServerHost serverHost={hostAddress} setServerHost={setAddress}/>
+                <ServerHost setServerHost={setAddress}/>
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
-            <Grid cellSize={cellSize} baseGrid={gameGrid}/>
             <GameStatus currentStatus={gameStatus}/>
-            <GameHelp/>
+            <GameHelp keydownHandler={handleKeyDown}/>
+            <Grid cellSize={cellSize} baseGrid={baseGrid}/>
+            <Grid cellSize={cellSize} baseGrid={gameGrid}/>
         </div>
     );
 }

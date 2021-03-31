@@ -1,13 +1,13 @@
-import {BaseGrid, CellSize, GameCell, Point, Point2D} from "../types";
+import {BaseGrid, CellSize, CellType, GameCell, Point, Point2D} from "../types";
 
 export function calculateCellRadius(layoutWidth: number, gameSize: number): number {
-    return layoutWidth / (3 * gameSize - 1);
+    return roundDecimals(layoutWidth / (3 * gameSize - 1));
 }
 
 export function calculateCellSizeByRadius(cellRadius: number): CellSize {
     return {
-        width: 2 * cellRadius,
-        height: 2 * cellRadius * Math.sin(Math.PI / 180 * 60)
+        width: roundDecimals(2 * cellRadius),
+        height: roundDecimals(2 * cellRadius * Math.sin(Math.PI / 180 * 60))
     };
 }
 
@@ -36,7 +36,8 @@ export function buildBaseGrid(gameSize: number, cellRadius: number, cellCorners:
                 ...cube,
                 left: pixelCoordinates.x,
                 top: pixelCoordinates.y,
-                points
+                points,
+                type: CellType.base
             };
             cellGrid.push(gridCell);
         }
@@ -50,15 +51,15 @@ function calculateCellCorner(cellSize: CellSize, cellRadius: number, index: numb
     const angle_rad = Math.PI / 180 * angle_deg;
 
     return {
-        x: cellSize.width / 2 + cellRadius * Math.cos(angle_rad),
-        y: cellSize.height / 2 + cellRadius * Math.sin(angle_rad)
+        x: roundDecimals(cellSize.width / 2 + cellRadius * Math.cos(angle_rad)),
+        y: roundDecimals(cellSize.height / 2 + cellRadius * Math.sin(angle_rad))
     };
 }
 
 function mapCubeToPixelCoordinates(cube: Point, cellRadius: number, gameSize: number): Point2D {
     return {
-        x: cellRadius * 3 / 2 * (cube.x + gameSize - 1),
-        y: cellRadius * Math.sqrt(3) * (0.5 * cube.x + (cube.z + gameSize - 1))
+        x: roundDecimals(cellRadius * 3 / 2 * (cube.x + gameSize - 1)),
+        y: roundDecimals(cellRadius * Math.sqrt(3) * (0.5 * cube.x + (cube.z + gameSize - 1)))
     };
 }
 
@@ -71,4 +72,8 @@ function mapCellCornersToSVGPath(points: Point2D[]): string {
         })
         .concat("Z")
         .join(' ');
+}
+
+function roundDecimals(n: number): number {
+    return parseFloat(n.toFixed(2));
 }
