@@ -1,5 +1,5 @@
-import {CellType, DirectionInfo, FilledGrid, GameCell, Point} from "../types";
-import * as _ from 'lodash';
+import {CellType, DirectionInfo, FilledGrid, GameCell, Point, Dictionary} from "../types";
+import * as _ from 'lodash-es';
 
 function isEqualCell(cell1: Point, cell2: Point) {
     return cell1.x === cell2.x && cell1.y === cell2.y && cell1.z === cell2.z;
@@ -30,7 +30,7 @@ export function getUpdatedGameGrid(serverPoints: Point[], baseGrid: GameCell[], 
     return sortMap(updatedGameGrid);
 }
 
-export const groupPointsArraysByAxis = (points: Point[], groupBy: keyof Point): _.Dictionary<Point[]> => _.groupBy(points, groupBy);
+export const groupPointArraysByAxis = (points: Point[], groupBy: keyof Point): Dictionary<Point[]> => _.groupBy(points, groupBy);
 
 export const sortPointsByAxis = (points: Point[], sortBy: keyof Point): Point[] => {
     const sortedPoints: Point[] = _.sortBy(points, sortBy);
@@ -108,7 +108,7 @@ export const createPointsWithValues = (values: number[], directionInfo: Directio
 export const calculatePointsOnDirection = (directionInfo: DirectionInfo, gameStatePoints: Point[], radius: number): Point[] => {
     const {groupBy, sortBy} = directionInfo;
 
-    const groupedPointArrays = groupPointsArraysByAxis(gameStatePoints, groupBy);
+    const groupedPointArrays = groupPointArraysByAxis(gameStatePoints, groupBy);
 
     const sortedPointArrays = Object.values(groupedPointArrays).map((pointArray) => sortPointsByAxis(pointArray, sortBy));
 
