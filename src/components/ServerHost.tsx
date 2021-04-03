@@ -7,7 +7,6 @@ interface ServerHostProps {
 
 export const ServerHost: React.FC<ServerHostProps> = ({setServerHost}) => {
     const onChange = (evt: React.FormEvent<HTMLSelectElement>) => {
-        console.log("current host: " + evt.currentTarget.value);
         setServerHost(evt.currentTarget.value);
     }
 

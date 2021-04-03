@@ -14,7 +14,12 @@ import {
     calculateCellRadius,
     calculateCellSizeByRadius
 } from "./utils/GridCalculations";
-import {calculatePointsOnDirection, getUpdatedGameGrid} from "./utils/GameCalculations";
+import {
+    arePointsInArraysEqual,
+    calculatePointsOnDirection,
+    gameOver,
+    getUpdatedGameGrid
+} from "./utils/GameCalculations";
 import {getDirectionByKey} from "./helpers/KeyboardHandler";
 
 function App(): JSX.Element {
@@ -22,35 +27,43 @@ function App(): JSX.Element {
     const [gameStatus, changeGameStatus] = useState<GameStatuses>(GameStatuses.RoundSelect);
     const [gameSize, setGameSize] = useState(DefaultGameSize);
     const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
+    const [score, setScore] = useState(0);
 
     const [baseGameGrid, setBaseGameGrid] = useState<BaseGrid>([]);
     const [gameGrid, setGameGrid] = useState<FilledGrid>(new Map());
-
-    const [serverPoints, setServerPoints] = useState<Point[]>([]);
-    const [lastServerResponseWasEmpty, setLastServerResponseWasEmpty] = useState<boolean>(false);
-
     const baseGrid: FilledGrid = new Map(baseGameGrid.map((cell, index) => [index, cell]));
+    const [serverPoints, setServerPoints] = useState<Point[]>([]);
 
+    // initial parsing of hashed game size
+    useEffect(() => {
+        const urlGameConfig = location.hash.match(/\d+/);
+        const matchResult = (urlGameConfig) ? urlGameConfig[0].toString() : DefaultGameSize.toString();
+        const urlGameSize = Number.parseInt(matchResult);
+        setGameSize(urlGameSize);
+    }, [window.location]);
+
+    // initial creation of API connector
     useEffect(() => createGameApiConnector(hostAddress), [hostAddress]);
 
+    // initial data fetching
     useEffect(() => {
         if (gameSize === 0) return;
 
-        fetchData(`/${gameSize}`);
+        setTimeout(() => fetchData(`/${gameSize}`), 50);
 
         async function fetchData(url: string) {
-            const gameApiConnector = getGameApiConnector();
             try {
-                const response = await gameApiConnector.post<Point[]>(url, []);
+                const response = await getGameApiConnector().post<Point[]>(url, []);
                 setServerPoints(response.data);
             } catch (e) {
                 console.log(e);
             }
         }
-    }, [gameSize]);
+    }, [gameSize, hostAddress]);
 
+    // updating grids
     useEffect(() => {
-        if (gameSize === 0 || serverPoints.length === 0) return;
+        if (gameSize === 0) return;
 
         const cellRadius = calculateCellRadius(LayoutWidth, gameSize);
         const cellSize = calculateCellSizeByRadius(cellRadius);
@@ -63,20 +76,26 @@ function App(): JSX.Element {
         setGameGrid(updatedGameGrid);
     }, [serverPoints, gameSize])
 
+    //game status
     useEffect(() => {
         if (serverPoints.length === 0) changeGameStatus(GameStatuses.RoundSelect);
-        //todo add check that player has no possible moves
-        else if (lastServerResponseWasEmpty) changeGameStatus(GameStatuses.GameOver);
+        else if (gameOver(serverPoints, gameSize)) changeGameStatus(GameStatuses.GameOver);
         else changeGameStatus(GameStatuses.Playing);
-    }, [lastServerResponseWasEmpty, serverPoints])
+    }, [serverPoints]);
 
+    // keyboard buttons pressing handler
     const handleKeyDown = useCallback((evt: KeyboardEvent) => {
         if (serverPoints.length === 0) return;
 
         const direction = getDirectionByKey(evt.code);
         if (!direction) return;
 
-        const newPoints = calculatePointsOnDirection(direction, serverPoints, gameSize);
+        const newPointsCalculations = calculatePointsOnDirection(direction, serverPoints, gameSize);
+
+        const newPoints = newPointsCalculations[0];
+        setScore(score + newPointsCalculations[1]);
+
+        if (arePointsInArraysEqual(newPoints, serverPoints)) return;
 
         exchangeDataWithGameApi(`/${gameSize}`);
 
@@ -86,7 +105,6 @@ function App(): JSX.Element {
                 const response = await gameApiConnector.post<Point[]>(url, newPoints);
                 response.data.map(newServerPoint => newPoints.push(newServerPoint));
 
-                setLastServerResponseWasEmpty(response.data.length === 0);
                 setServerPoints(newPoints);
             } catch (e) {
                 console.log(e);
@@ -103,8 +121,9 @@ function App(): JSX.Element {
             </div>
             <GameStatus currentStatus={gameStatus}/>
             <GameHelp keydownHandler={handleKeyDown}/>
-            <Grid cellSize={cellSize} baseGrid={baseGrid}/>
-            <Grid cellSize={cellSize} baseGrid={gameGrid}/>
+            <br/>
+            <div>Current score: {score}</div>
+            <Grid cellSize={cellSize} baseGrid={baseGrid} gameGrid={gameGrid}/>
         </div>
     );
 }

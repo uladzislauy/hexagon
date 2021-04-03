@@ -17,12 +17,8 @@ export const GameSizeSelector: React.FC<GameSizeSelectorProps> = ({selectedSize,
             setSelectedSize(selectedSize);
         }), [setSelectedSize]);
 
-        return <button  className={btnClass} key={buttonSize} value={buttonSize} onClick={onClick}>{buttonSize}</button>
+        return <button className={btnClass} key={buttonSize} value={buttonSize} onClick={onClick}>{buttonSize}</button>
     });
 
-    return (
-        <div>
-            Select game size: {buttons}
-        </div>
-    );
+    return <div>Select game size: {buttons}</div>
 };
