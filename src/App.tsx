@@ -20,7 +20,12 @@ import {getDirectionByKey} from "./helpers/KeyboardHandler";
 function App(): JSX.Element {
     const [hostAddress, setAddress] = useState(BeHost);
     const [gameStatus, changeGameStatus] = useState<GameStatuses>(GameStatuses.RoundSelect);
-    const [gameSize, setGameSize] = useState(DefaultGameSize);
+
+    const urlGameConfig = location.hash.match(/\d+/);
+    const matchResult = (urlGameConfig) ? urlGameConfig[0].toString() : DefaultGameSize.toString();
+    const urlGameSize = Number.parseInt(matchResult);
+    const [gameSize, setGameSize] = useState(urlGameSize);
+
     const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
 
     const [baseGameGrid, setBaseGameGrid] = useState<BaseGrid>([]);
@@ -47,7 +52,7 @@ function App(): JSX.Element {
                 console.log(e);
             }
         }
-    }, [gameSize]);
+    }, [gameSize, hostAddress]);
 
     useEffect(() => {
         if (gameSize === 0 || serverPoints.length === 0) return;
