@@ -114,12 +114,12 @@ function App(): JSX.Element {
 
     return (
         <div className="App">
-            <div>
+            <div className='infoBlock'>
                 <div>Game server url</div>
                 <ServerHost setServerHost={setAddress}/>
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
+                <GameHelp keydownHandler={handleKeyDown}/>
             </div>
-            <GameHelp keydownHandler={handleKeyDown}/>
             <br/>
             <GameStatus currentStatus={gameStatus} score={score}/>
             <Grid cellSize={cellSize} baseGrid={baseGrid} gameGrid={gameGrid}/>
