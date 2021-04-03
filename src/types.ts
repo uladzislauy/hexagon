@@ -17,7 +17,6 @@ export interface GameCell extends Point {
     points: string;
     top: number;
     left: number;
-    type: CellType;
 }
 
 export interface Dictionary<T> {
@@ -25,11 +24,6 @@ export interface Dictionary<T> {
 }
 
 export type BaseGrid = GameCell[];
-
-export enum CellType {
-    base,
-    game
-}
 
 export type FilledGrid = Map<number, GameCell>;
 

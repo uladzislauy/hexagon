@@ -1,4 +1,4 @@
-import {CellType, DirectionInfo, FilledGrid, GameCell, Point, Dictionary} from "../types";
+import {Dictionary, DirectionInfo, FilledGrid, GameCell, Point} from "../types";
 import * as _ from 'lodash-es';
 
 function isEqualCell(cell1: Point, cell2: Point) {
@@ -24,7 +24,7 @@ export function getUpdatedGameGrid(serverPoints: Point[], baseGrid: GameCell[], 
             value: cell.value
         }
 
-        updatedGameGrid.set(lastFilledCellId++, {...newCell, type: CellType.game});
+        updatedGameGrid.set(lastFilledCellId++, {...newCell});
     });
 
     return sortMap(updatedGameGrid);

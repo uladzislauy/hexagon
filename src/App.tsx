@@ -108,8 +108,7 @@ function App(): JSX.Element {
             </div>
             <GameStatus currentStatus={gameStatus}/>
             <GameHelp keydownHandler={handleKeyDown}/>
-            <Grid cellSize={cellSize} baseGrid={baseGrid}/>
-            <Grid cellSize={cellSize} baseGrid={gameGrid}/>
+            <Grid cellSize={cellSize} baseGrid={baseGrid} gameGrid={gameGrid}/>
         </div>
     );
 }

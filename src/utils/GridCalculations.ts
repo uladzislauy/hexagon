@@ -1,4 +1,4 @@
-import {BaseGrid, CellSize, CellType, GameCell, Point, Point2D} from "../types";
+import {BaseGrid, CellSize, GameCell, Point, Point2D} from "../types";
 
 export function calculateCellRadius(layoutWidth: number, gameSize: number): number {
     return roundDecimals(layoutWidth / (3 * gameSize - 1));
@@ -36,8 +36,7 @@ export function buildBaseGrid(gameSize: number, cellRadius: number, cellCorners:
                 ...cube,
                 left: pixelCoordinates.x,
                 top: pixelCoordinates.y,
-                points,
-                type: CellType.base
+                points
             };
             cellGrid.push(gridCell);
         }
