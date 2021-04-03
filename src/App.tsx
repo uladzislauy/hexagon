@@ -14,7 +14,7 @@ import {
     calculateCellRadius,
     calculateCellSizeByRadius
 } from "./utils/GridCalculations";
-import {calculatePointsOnDirection, getUpdatedGameGrid} from "./utils/GameCalculations";
+import {calculatePointsOnDirection, gameOver, getUpdatedGameGrid} from "./utils/GameCalculations";
 import {getDirectionByKey} from "./helpers/KeyboardHandler";
 
 function App(): JSX.Element {
@@ -32,7 +32,6 @@ function App(): JSX.Element {
     const [gameGrid, setGameGrid] = useState<FilledGrid>(new Map());
 
     const [serverPoints, setServerPoints] = useState<Point[]>([]);
-    const [lastServerResponseWasEmpty, setLastServerResponseWasEmpty] = useState<boolean>(false);
 
     const baseGrid: FilledGrid = new Map(baseGameGrid.map((cell, index) => [index, cell]));
 
@@ -70,10 +69,9 @@ function App(): JSX.Element {
 
     useEffect(() => {
         if (serverPoints.length === 0) changeGameStatus(GameStatuses.RoundSelect);
-        //todo add check that player has no possible moves
-        else if (lastServerResponseWasEmpty) changeGameStatus(GameStatuses.GameOver);
+        else if (gameOver(serverPoints, gameSize)) changeGameStatus(GameStatuses.GameOver);
         else changeGameStatus(GameStatuses.Playing);
-    }, [lastServerResponseWasEmpty, serverPoints])
+    }, [serverPoints]);
 
     const handleKeyDown = useCallback((evt: KeyboardEvent) => {
         if (serverPoints.length === 0) return;
@@ -91,7 +89,6 @@ function App(): JSX.Element {
                 const response = await gameApiConnector.post<Point[]>(url, newPoints);
                 response.data.map(newServerPoint => newPoints.push(newServerPoint));
 
-                setLastServerResponseWasEmpty(response.data.length === 0);
                 setServerPoints(newPoints);
             } catch (e) {
                 console.log(e);

@@ -1,5 +1,6 @@
 import {Dictionary, DirectionInfo, FilledGrid, GameCell, Point} from "../types";
 import * as _ from 'lodash-es';
+import {Directions, HEX_GROUP_DIRECTIONS} from "../consts";
 
 function isEqualCell(cell1: Point, cell2: Point) {
     return cell1.x === cell2.x && cell1.y === cell2.y && cell1.z === cell2.z;
@@ -125,3 +126,26 @@ export const calculatePointsOnDirection = (directionInfo: DirectionInfo, gameSta
     return ([] as Point[]).concat(...shiftedPointArrays);
 };
 
+export const gameOver = (points: Point[], gameSize: number): boolean => {
+    if (points.length < getMaxPoints(gameSize)) return false;
+
+    let gameOver = true;
+
+    Object.values(Directions).forEach((direction) => {
+        const directionInfo = HEX_GROUP_DIRECTIONS.get(direction);
+        if (!directionInfo) return;
+
+        const pointsOnNewStep = calculatePointsOnDirection(directionInfo, points, gameSize);
+        if (pointsOnNewStep.length !== points.length) gameOver = false;
+    });
+
+    return gameOver;
+};
+
+function getMaxPoints(gameSize: number): number {
+    let maxPoints = 7;
+    if (gameSize === 3) maxPoints = 19;
+    if (gameSize === 4) maxPoints = 37;
+
+    return maxPoints;
+}
