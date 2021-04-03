@@ -14,38 +14,45 @@ import {
     calculateCellRadius,
     calculateCellSizeByRadius
 } from "./utils/GridCalculations";
-import {calculatePointsOnDirection, gameOver, getUpdatedGameGrid} from "./utils/GameCalculations";
+import {
+    arePointsInArraysEqual,
+    calculatePointsOnDirection,
+    gameOver,
+    getUpdatedGameGrid
+} from "./utils/GameCalculations";
 import {getDirectionByKey} from "./helpers/KeyboardHandler";
 
 function App(): JSX.Element {
     const [hostAddress, setAddress] = useState(BeHost);
     const [gameStatus, changeGameStatus] = useState<GameStatuses>(GameStatuses.RoundSelect);
-
-    const urlGameConfig = location.hash.match(/\d+/);
-    const matchResult = (urlGameConfig) ? urlGameConfig[0].toString() : DefaultGameSize.toString();
-    const urlGameSize = Number.parseInt(matchResult);
-    const [gameSize, setGameSize] = useState(urlGameSize);
-
+    const [gameSize, setGameSize] = useState(DefaultGameSize);
     const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
 
     const [baseGameGrid, setBaseGameGrid] = useState<BaseGrid>([]);
     const [gameGrid, setGameGrid] = useState<FilledGrid>(new Map());
-
+    const baseGrid: FilledGrid = new Map(baseGameGrid.map((cell, index) => [index, cell]));
     const [serverPoints, setServerPoints] = useState<Point[]>([]);
 
-    const baseGrid: FilledGrid = new Map(baseGameGrid.map((cell, index) => [index, cell]));
+    // initial parsing of hashed game size
+    useEffect(() => {
+        const urlGameConfig = location.hash.match(/\d+/);
+        const matchResult = (urlGameConfig) ? urlGameConfig[0].toString() : DefaultGameSize.toString();
+        const urlGameSize = Number.parseInt(matchResult);
+        setGameSize(urlGameSize);
+    }, [window.location]);
 
+    // initial creation of API connector
     useEffect(() => createGameApiConnector(hostAddress), [hostAddress]);
 
+    // initial data fetching
     useEffect(() => {
         if (gameSize === 0) return;
 
-        fetchData(`/${gameSize}`);
+        setTimeout(() => fetchData(`/${gameSize}`), 50);
 
         async function fetchData(url: string) {
-            const gameApiConnector = getGameApiConnector();
             try {
-                const response = await gameApiConnector.post<Point[]>(url, []);
+                const response = await getGameApiConnector().post<Point[]>(url, []);
                 setServerPoints(response.data);
             } catch (e) {
                 console.log(e);
@@ -53,8 +60,9 @@ function App(): JSX.Element {
         }
     }, [gameSize, hostAddress]);
 
+    // updating grids
     useEffect(() => {
-        if (gameSize === 0 || serverPoints.length === 0) return;
+        if (gameSize === 0) return;
 
         const cellRadius = calculateCellRadius(LayoutWidth, gameSize);
         const cellSize = calculateCellSizeByRadius(cellRadius);
@@ -67,12 +75,14 @@ function App(): JSX.Element {
         setGameGrid(updatedGameGrid);
     }, [serverPoints, gameSize])
 
+    //game status
     useEffect(() => {
         if (serverPoints.length === 0) changeGameStatus(GameStatuses.RoundSelect);
         else if (gameOver(serverPoints, gameSize)) changeGameStatus(GameStatuses.GameOver);
         else changeGameStatus(GameStatuses.Playing);
     }, [serverPoints]);
 
+    // keyboard buttons pressing handler
     const handleKeyDown = useCallback((evt: KeyboardEvent) => {
         if (serverPoints.length === 0) return;
 
@@ -80,6 +90,8 @@ function App(): JSX.Element {
         if (!direction) return;
 
         const newPoints = calculatePointsOnDirection(direction, serverPoints, gameSize);
+
+        if (arePointsInArraysEqual(newPoints, serverPoints)) return;
 
         exchangeDataWithGameApi(`/${gameSize}`);
 

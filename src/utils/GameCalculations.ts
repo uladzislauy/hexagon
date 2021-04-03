@@ -1,14 +1,6 @@
 import {Dictionary, DirectionInfo, FilledGrid, GameCell, Point} from "../types";
 import * as _ from 'lodash-es';
-import {Directions, HEX_GROUP_DIRECTIONS} from "../consts";
-
-function isEqualCell(cell1: Point, cell2: Point) {
-    return cell1.x === cell2.x && cell1.y === cell2.y && cell1.z === cell2.z;
-}
-
-function sortMap<K>(cells: Map<number, K>): Map<number, K> {
-    return new Map([...cells.entries()].sort((cell1, cell2) => cell2[0] - cell1[0]));
-}
+import {Directions, GridMovementDirections} from "../consts";
 
 export function getUpdatedGameGrid(serverPoints: Point[], baseGrid: GameCell[], gameGrid: FilledGrid): FilledGrid {
     const updatedGameGrid = new Map(gameGrid);
@@ -31,19 +23,79 @@ export function getUpdatedGameGrid(serverPoints: Point[], baseGrid: GameCell[], 
     return sortMap(updatedGameGrid);
 }
 
-export const groupPointArraysByAxis = (points: Point[], groupBy: keyof Point): Dictionary<Point[]> => _.groupBy(points, groupBy);
+export function calculatePointsOnDirection(directionInfo: DirectionInfo, gameStatePoints: Point[], radius: number): Point[] {
+    const {groupBy, sortBy} = directionInfo;
 
-export const sortPointsByAxis = (points: Point[], sortBy: keyof Point): Point[] => {
+    const groupedPointArrays = groupPointArraysByAxis(gameStatePoints, groupBy);
+
+    const sortedPointArrays = Object.values(groupedPointArrays).map((pointArray) => sortPointsByAxis(pointArray, sortBy));
+
+    const groupedPointIndexes = Object.keys(groupedPointArrays);
+
+    const valueArrays = sortedPointArrays.map((pointArray) => takeValuesFromPoints(pointArray));
+
+    const shiftedValueArrays = valueArrays.map((valueArray) => shiftValues(valueArray));
+
+    const shiftedPointArrays = shiftedValueArrays.map((valueArray, index) =>
+        createPointsWithValues(valueArray, directionInfo, radius, parseInt(groupedPointIndexes[index], 10)
+        ));
+
+    return ([] as Point[]).concat(...shiftedPointArrays);
+}
+
+export function arePointsInArraysEqual(first: Point[], second: Point[]): boolean {
+    if (first.length !== second.length) return false;
+
+    let equalCells = 0;
+
+    first.forEach(point1 => {
+        second.forEach(point2 => {
+            if (isEqualCell(point1, point2)) equalCells++;
+        })
+    })
+
+    return equalCells === first.length;
+}
+
+export function gameOver(points: Point[], gameSize: number): boolean {
+    if (points.length < getMaxPoints(gameSize)) return false;
+
+    let gameOver = true;
+
+    Object.values(Directions).forEach((direction) => {
+        const directionInfo = GridMovementDirections.get(direction);
+        if (!directionInfo) return;
+
+        const pointsOnNewStep = calculatePointsOnDirection(directionInfo, points, gameSize);
+        if (pointsOnNewStep.length !== points.length) gameOver = false;
+    });
+
+    return gameOver;
+}
+
+function isEqualCell(cell1: Point, cell2: Point) {
+    return cell1.x === cell2.x && cell1.y === cell2.y && cell1.z === cell2.z;
+}
+
+function sortMap<K>(cells: Map<number, K>): Map<number, K> {
+    return new Map([...cells.entries()].sort((cell1, cell2) => cell2[0] - cell1[0]));
+}
+
+function groupPointArraysByAxis(points: Point[], groupBy: keyof Point): Dictionary<Point[]> {
+    return _.groupBy(points, groupBy)
+}
+
+function sortPointsByAxis(points: Point[], sortBy: keyof Point): Point[] {
     const sortedPoints: Point[] = _.sortBy(points, sortBy);
     return sortedPoints;
-};
+}
 
-export const takeValuesFromPoints = (points: Point[]): number[] => {
+function takeValuesFromPoints(points: Point[]): number[] {
     const values = points.map((point) => point.value);
     return values;
-};
+}
 
-export const shiftValues = (values: number[]): number[] => {
+function shiftValues(values: number[]): number[] {
     const shiftedValues: number[] = [];
     let indexToSkip: number;
     values.forEach((value, index) => {
@@ -59,9 +111,9 @@ export const shiftValues = (values: number[]): number[] => {
         }
     });
     return shiftedValues;
-};
+}
 
-export const createPointsWithValues = (values: number[], directionInfo: DirectionInfo, radius: number, lineIndex: number): Point[] => {
+function createPointsWithValues(values: number[], directionInfo: DirectionInfo, radius: number, lineIndex: number): Point[] {
     const result: Point[] = [];
     values.forEach((value, index) => {
         let x = 0;
@@ -104,43 +156,7 @@ export const createPointsWithValues = (values: number[], directionInfo: Directio
         result.push(newPoint);
     });
     return result;
-};
-
-export const calculatePointsOnDirection = (directionInfo: DirectionInfo, gameStatePoints: Point[], radius: number): Point[] => {
-    const {groupBy, sortBy} = directionInfo;
-
-    const groupedPointArrays = groupPointArraysByAxis(gameStatePoints, groupBy);
-
-    const sortedPointArrays = Object.values(groupedPointArrays).map((pointArray) => sortPointsByAxis(pointArray, sortBy));
-
-    const groupedPointIndexes = Object.keys(groupedPointArrays);
-
-    const valueArrays = sortedPointArrays.map((pointArray) => takeValuesFromPoints(pointArray));
-
-    const shiftedValueArrays = valueArrays.map((valueArray) => shiftValues(valueArray));
-
-    const shiftedPointArrays = shiftedValueArrays.map((valueArray, index) =>
-        createPointsWithValues(valueArray, directionInfo, radius, parseInt(groupedPointIndexes[index], 10)
-        ));
-
-    return ([] as Point[]).concat(...shiftedPointArrays);
-};
-
-export const gameOver = (points: Point[], gameSize: number): boolean => {
-    if (points.length < getMaxPoints(gameSize)) return false;
-
-    let gameOver = true;
-
-    Object.values(Directions).forEach((direction) => {
-        const directionInfo = HEX_GROUP_DIRECTIONS.get(direction);
-        if (!directionInfo) return;
-
-        const pointsOnNewStep = calculatePointsOnDirection(directionInfo, points, gameSize);
-        if (pointsOnNewStep.length !== points.length) gameOver = false;
-    });
-
-    return gameOver;
-};
+}
 
 function getMaxPoints(gameSize: number): number {
     let maxPoints = 7;
