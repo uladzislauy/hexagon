@@ -43,8 +43,6 @@ export function calculatePointsOnDirection(directionInfo: DirectionInfo, gameSta
             return createPointsWithValues(valueArray[0], directionInfo, radius, parseInt(groupedPointIndexes[index], 10));
         });
 
-    console.log(thisMoveScore);
-
     return [([] as Point[]).concat(...shiftedPointArrays), thisMoveScore];
 }
 
