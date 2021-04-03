@@ -119,10 +119,9 @@ function App(): JSX.Element {
                 <ServerHost setServerHost={setAddress}/>
                 <GameSizeSelector selectedSize={gameSize} setSelectedSize={setGameSize}/>
             </div>
-            <GameStatus currentStatus={gameStatus}/>
             <GameHelp keydownHandler={handleKeyDown}/>
             <br/>
-            <div>Current score: {score}</div>
+            <GameStatus currentStatus={gameStatus} score={score}/>
             <Grid cellSize={cellSize} baseGrid={baseGrid} gameGrid={gameGrid}/>
         </div>
     );
