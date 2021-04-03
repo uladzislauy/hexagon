@@ -23,8 +23,9 @@ export function getUpdatedGameGrid(serverPoints: Point[], baseGrid: GameCell[], 
     return sortMap(updatedGameGrid);
 }
 
-export function calculatePointsOnDirection(directionInfo: DirectionInfo, gameStatePoints: Point[], radius: number): Point[] {
+export function calculatePointsOnDirection(directionInfo: DirectionInfo, gameStatePoints: Point[], radius: number): [Point[], number] {
     const {groupBy, sortBy} = directionInfo;
+    let thisMoveScore = 0;
 
     const groupedPointArrays = groupPointArraysByAxis(gameStatePoints, groupBy);
 
@@ -36,11 +37,15 @@ export function calculatePointsOnDirection(directionInfo: DirectionInfo, gameSta
 
     const shiftedValueArrays = valueArrays.map((valueArray) => shiftValues(valueArray));
 
-    const shiftedPointArrays = shiftedValueArrays.map((valueArray, index) =>
-        createPointsWithValues(valueArray, directionInfo, radius, parseInt(groupedPointIndexes[index], 10)
-        ));
+    const shiftedPointArrays = shiftedValueArrays.map(
+        (valueArray, index) => {
+            thisMoveScore += valueArray[1];
+            return createPointsWithValues(valueArray[0], directionInfo, radius, parseInt(groupedPointIndexes[index], 10));
+        });
 
-    return ([] as Point[]).concat(...shiftedPointArrays);
+    console.log(thisMoveScore);
+
+    return [([] as Point[]).concat(...shiftedPointArrays), thisMoveScore];
 }
 
 export function arePointsInArraysEqual(first: Point[], second: Point[]): boolean {
@@ -66,7 +71,7 @@ export function gameOver(points: Point[], gameSize: number): boolean {
         const directionInfo = GridMovementDirections.get(direction);
         if (!directionInfo) return;
 
-        const pointsOnNewStep = calculatePointsOnDirection(directionInfo, points, gameSize);
+        const pointsOnNewStep = calculatePointsOnDirection(directionInfo, points, gameSize)[0];
         if (pointsOnNewStep.length !== points.length) gameOver = false;
     });
 
@@ -95,9 +100,11 @@ function takeValuesFromPoints(points: Point[]): number[] {
     return values;
 }
 
-function shiftValues(values: number[]): number[] {
+function shiftValues(values: number[]): [number[], number] {
     const shiftedValues: number[] = [];
     let indexToSkip: number;
+    let thisMoveScore = 0;
+
     values.forEach((value, index) => {
         const nextIndex = index + 1;
         const nextValue = values[nextIndex];
@@ -105,12 +112,14 @@ function shiftValues(values: number[]): number[] {
             if (!nextValue || value !== nextValue) {
                 shiftedValues.push(value);
             } else {
+                thisMoveScore += value * 2;
                 shiftedValues.push(value * 2);
                 indexToSkip = nextIndex;
             }
         }
     });
-    return shiftedValues;
+
+    return [shiftedValues, thisMoveScore];
 }
 
 function createPointsWithValues(values: number[], directionInfo: DirectionInfo, radius: number, lineIndex: number): Point[] {

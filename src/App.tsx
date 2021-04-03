@@ -27,6 +27,7 @@ function App(): JSX.Element {
     const [gameStatus, changeGameStatus] = useState<GameStatuses>(GameStatuses.RoundSelect);
     const [gameSize, setGameSize] = useState(DefaultGameSize);
     const [cellSize, setCellSize] = useState<CellSize>({width: 0, height: 0});
+    const [score, setScore] = useState(0);
 
     const [baseGameGrid, setBaseGameGrid] = useState<BaseGrid>([]);
     const [gameGrid, setGameGrid] = useState<FilledGrid>(new Map());
@@ -89,7 +90,10 @@ function App(): JSX.Element {
         const direction = getDirectionByKey(evt.code);
         if (!direction) return;
 
-        const newPoints = calculatePointsOnDirection(direction, serverPoints, gameSize);
+        const newPointsCalculations = calculatePointsOnDirection(direction, serverPoints, gameSize);
+
+        const newPoints = newPointsCalculations[0];
+        setScore(score + newPointsCalculations[1]);
 
         if (arePointsInArraysEqual(newPoints, serverPoints)) return;
 
@@ -117,6 +121,8 @@ function App(): JSX.Element {
             </div>
             <GameStatus currentStatus={gameStatus}/>
             <GameHelp keydownHandler={handleKeyDown}/>
+            <br/>
+            <div>Current score: {score}</div>
             <Grid cellSize={cellSize} baseGrid={baseGrid} gameGrid={gameGrid}/>
         </div>
     );
